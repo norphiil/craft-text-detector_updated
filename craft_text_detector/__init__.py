@@ -106,7 +106,7 @@ class Craft:
         self.refine_net = None
         empty_cuda_cache()
 
-    def detect_text(self, image, image_path=None):
+    def detect_text(self, image, image_path=None, file_name=None):
         """
         Arguments:
             image: path to the image to be processed or numpy array or PIL image
@@ -154,7 +154,7 @@ class Craft:
             if type(image) == str:
                 file_name, file_ext = os.path.splitext(os.path.basename(image))
             else:
-                file_name = "image"
+                file_name = file_name if file_name else "image"
             exported_file_paths = export_detected_regions(
                 image=image,
                 regions=regions,
