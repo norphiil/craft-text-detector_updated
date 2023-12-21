@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import os
 from typing import Optional
-
+import numpy as np
 import craft_text_detector.craft_utils as craft_utils
 import craft_text_detector.file_utils as file_utils
 import craft_text_detector.image_utils as image_utils
@@ -10,7 +10,6 @@ import craft_text_detector.predict as predict
 import craft_text_detector.torch_utils as torch_utils
 
 __version__ = "0.4.3"
-
 
 __all__ = [
     "read_image",
@@ -32,21 +31,33 @@ export_extra_results = file_utils.export_extra_results
 empty_cuda_cache = torch_utils.empty_cuda_cache
 
 
+def calculate_polygon_area(polygon):
+    x = polygon[:, 0]
+    y = polygon[:, 1]
+    return 0.5 * np.abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
+
+
+def calculate_polygons_area_ratio(polygons, image_width, image_height):
+    total_area = image_width * image_height
+    polygons_area = sum(calculate_polygon_area(poly) for poly in polygons)
+    return polygons_area / total_area
+
+
 class Craft:
     def __init__(
-        self,
-        output_dir=None,
-        rectify=True,
-        export_extra=True,
-        text_threshold=0.7,
-        link_threshold=0.4,
-        low_text=0.4,
-        cuda=False,
-        long_size=1280,
-        refiner=True,
-        crop_type="poly",
-        weight_path_craft_net: Optional[str] = None,
-        weight_path_refine_net: Optional[str] = None,
+            self,
+            output_dir=None,
+            rectify=True,
+            export_extra=True,
+            text_threshold=0.7,
+            link_threshold=0.4,
+            low_text=0.4,
+            cuda=False,
+            long_size=1280,
+            refiner=True,
+            crop_type="poly",
+            weight_path_craft_net: Optional[str] = None,
+            weight_path_refine_net: Optional[str] = None,
     ):
         """
         Arguments:
@@ -106,7 +117,7 @@ class Craft:
         self.refine_net = None
         empty_cuda_cache()
 
-    def detect_text(self, image, image_path=None, file_name=None):
+    def detect_text(self, image, image_path=None, file_name=None, maxR=0.05):
         """
         Arguments:
             image: path to the image to be processed or numpy array or PIL image
@@ -147,9 +158,19 @@ class Craft:
         else:
             raise TypeError("crop_type can be only 'polys' or 'boxes'")
 
+        if type(image) == str:
+            image = image_utils.read_image(image)
+
+        height, width = image.shape[:2]
+
+        print(regions)
+        # filiter here
+        total = calculate_polygons_area_ratio(regions, image_width=width, image_height=height)
+        print(total)
         # export if output_dir is given
         prediction_result["text_crop_paths"] = []
-        if self.output_dir is not None:
+        if self.output_dir is not None and (total >= maxR or len(regions) > 3):
+
             # export detected text regions
             if type(image) == str:
                 file_name, file_ext = os.path.splitext(os.path.basename(image))
