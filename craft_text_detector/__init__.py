@@ -43,6 +43,53 @@ def calculate_polygons_area_ratio(polygons, image_width, image_height):
     return polygons_area / total_area
 
 
+def calculate_angle(p1, p2):
+    """计算两点间线段与水平线的夹角（以度为单位）"""
+    angle = np.arctan2(abs(p2[1] - p1[1]), abs(p2[0] - p1[0])) * 180 / np.pi
+    return min(angle, 90 - angle)  # 返回与水平或垂直线较小的角度
+
+
+def check_is_aligned(polygons):
+    """检查polygons列表中是否水平的多边形"""
+    for polygon in polygons:
+        if len(polygon) == 4:  # 确保多边形由四个点组成
+            # 计算所有相邻点对之间的距离，并找到最长边
+            distances = [np.linalg.norm(np.array(polygon[i]) - np.array(polygon[(i + 1) % 4])) for i in range(4)]
+            longest_edge_index = np.argmax(distances)
+
+            # 计算最长边与水平线的夹角
+            p1, p2 = polygon[longest_edge_index], polygon[(longest_edge_index + 1) % 4]
+            angle = calculate_angle(p1, p2)
+
+            if angle < 5:
+                return True
+    return False
+
+
+def calculate_vertical_range(height, percentage):
+    """根据图像高度和百分比计算垂直范围"""
+    margin = height * (1 - percentage) / 2
+    return margin, height - margin
+
+
+def is_within_vertical_range(polygon, height, percentage):
+    """检查多边形中心点的y坐标是否在指定的垂直范围内"""
+    # 计算多边形的中心点
+    center = np.mean(polygon, axis=0)
+    # 计算垂直范围
+    lower_bound, upper_bound = calculate_vertical_range(height, percentage)
+    # 检查中心点的y坐标是否在范围内
+    return lower_bound <= center[1] <= upper_bound
+
+
+def check_is_not_center(polygons, height, percentage):
+    """检查polygons列表中的多边形中心点是否满足条件"""
+    for polygon in polygons:
+        if not is_within_vertical_range(polygon, height, percentage):
+            return True
+    return False
+
+
 class Craft:
     def __init__(
             self,
@@ -117,7 +164,7 @@ class Craft:
         self.refine_net = None
         empty_cuda_cache()
 
-    def detect_text(self, image, image_path=None, file_name=None, maxR=0.05):
+    def detect_text(self, image, image_path=None, file_name=None, maxR=0.05, isOpEd=False):
         """
         Arguments:
             image: path to the image to be processed or numpy array or PIL image
@@ -163,13 +210,34 @@ class Craft:
 
         height, width = image.shape[:2]
 
-        print(regions)
         # filiter here
         total = calculate_polygons_area_ratio(regions, image_width=width, image_height=height)
-        print(total)
+
+
+
+        # 当不是片头片尾的时候
+        if not isOpEd:
+            if not total >= maxR or not len(regions) > 3:
+                print(f"文字占比或文字数量不足, r: {total}, n: {len(regions)}")
+                return
+            # 检查是否存在水平的多边形
+            if not check_is_aligned(regions):
+                print("不存在水平的多边形")
+                return
+            # 检查是否存在内容边界以外的多边形
+            if not check_is_not_center(regions, height, 0.7):
+                print("不存在内容边界以外的内容")
+                return
+        else:
+            if not len(regions) > 3:
+                print(f"数量不足, n: {len(regions)}")
+                return
+
+        # print("前置过滤完毕")
+        # print(regions)
         # export if output_dir is given
         prediction_result["text_crop_paths"] = []
-        if self.output_dir is not None and (total >= maxR or len(regions) > 3):
+        if self.output_dir is not None:
 
             # export detected text regions
             if type(image) == str:
