@@ -40,11 +40,8 @@ def load_craftnet_model(
 ):
     # get craft net path
     if weight_path is None:
-        home_path = str(Path.home())
         weight_path = Path(
-            home_path,
-            ".craft_text_detector",
-            "weights",
+            "models",
             "craft_mlt_25k.pth"
         )
     weight_path = Path(weight_path).resolve()
@@ -84,11 +81,8 @@ def load_refinenet_model(
 ):
     # get refine net path
     if weight_path is None:
-        home_path = Path.home()
         weight_path = Path(
-            home_path,
-            ".craft_text_detector",
-            "weights",
+            "models",
             "craft_refiner_CTW1500.pth"
         )
     weight_path = Path(weight_path).resolve()
