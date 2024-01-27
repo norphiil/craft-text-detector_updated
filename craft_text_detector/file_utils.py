@@ -7,6 +7,8 @@ import numpy as np
 
 from craft_text_detector.image_utils import read_image
 
+import urllib.request
+
 
 def download(url: str, save_path: str):
     """
@@ -19,7 +21,7 @@ def download(url: str, save_path: str):
     # create save_dir if not present
     create_dir(os.path.dirname(save_path))
     # download file
-    gdown.download(url, save_path, quiet=False)
+    urllib.request.urlretrieve(url, save_path)
 
 
 def create_dir(_dir):
@@ -39,7 +41,7 @@ def list_files(in_path):
     img_files = []
     mask_files = []
     gt_files = []
-    for (dirpath, dirnames, filenames) in os.walk(in_path):
+    for dirpath, dirnames, filenames in os.walk(in_path):
         for file in filenames:
             filename, ext = os.path.splitext(file)
             ext = str.lower(ext)

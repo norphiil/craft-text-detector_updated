@@ -9,7 +9,7 @@ import craft_text_detector.image_utils as image_utils
 import craft_text_detector.predict as predict
 import craft_text_detector.torch_utils as torch_utils
 
-__version__ = "0.4.5"
+__version__ = "0.4.6"
 
 __all__ = [
     "read_image",
@@ -54,7 +54,10 @@ def check_is_aligned(polygons):
     for polygon in polygons:
         if len(polygon) == 4:  # 确保多边形由四个点组成
             # 计算所有相邻点对之间的距离，并找到最长边
-            distances = [np.linalg.norm(np.array(polygon[i]) - np.array(polygon[(i + 1) % 4])) for i in range(4)]
+            distances = [
+                np.linalg.norm(np.array(polygon[i]) - np.array(polygon[(i + 1) % 4]))
+                for i in range(4)
+            ]
             longest_edge_index = np.argmax(distances)
 
             # 计算最长边与水平线的夹角
@@ -92,19 +95,19 @@ def check_is_not_center(polygons, height, percentage):
 
 class Craft:
     def __init__(
-            self,
-            output_dir=None,
-            rectify=True,
-            export_extra=True,
-            text_threshold=0.7,
-            link_threshold=0.4,
-            low_text=0.4,
-            cuda=False,
-            long_size=1280,
-            refiner=True,
-            crop_type="poly",
-            weight_path_craft_net: Optional[str] = None,
-            weight_path_refine_net: Optional[str] = None,
+        self,
+        output_dir=None,
+        rectify=True,
+        export_extra=True,
+        text_threshold=0.7,
+        link_threshold=0.4,
+        low_text=0.4,
+        cuda=False,
+        long_size=1280,
+        refiner=True,
+        crop_type="poly",
+        weight_path_craft_net: Optional[str] = None,
+        weight_path_refine_net: Optional[str] = None,
     ):
         """
         Arguments:
@@ -164,7 +167,9 @@ class Craft:
         self.refine_net = None
         empty_cuda_cache()
 
-    def detect_text(self, image, image_path=None, file_name=None, maxR=0.05, isOpEd=False):
+    def detect_text(
+        self, image, image_path=None, file_name=None, maxR=0.05, isOpEd=False
+    ):
         """
         Arguments:
             image: path to the image to be processed or numpy array or PIL image
@@ -211,9 +216,9 @@ class Craft:
         height, width = image.shape[:2]
 
         # filiter here
-        total = calculate_polygons_area_ratio(regions, image_width=width, image_height=height)
-
-
+        total = calculate_polygons_area_ratio(
+            regions, image_width=width, image_height=height
+        )
 
         # 当不是片头片尾的时候
         if not isOpEd:
@@ -238,7 +243,6 @@ class Craft:
         # export if output_dir is given
         prediction_result["text_crop_paths"] = []
         if self.output_dir is not None:
-
             # export detected text regions
             if type(image) == str:
                 file_name, file_ext = os.path.splitext(os.path.basename(image))

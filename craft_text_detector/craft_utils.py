@@ -10,10 +10,8 @@ import numpy as np
 import craft_text_detector.file_utils as file_utils
 import craft_text_detector.torch_utils as torch_utils
 
-CRAFT_GDRIVE_URL = "https://drive.google.com/uc?id=1bupFXqT-VU6Jjeul13XP7yx2Sg5IHr4J"
-REFINENET_GDRIVE_URL = (
-    "https://drive.google.com/uc?id=1xcE9qpJXp4ofINwXWVhhQIh9S8Z7cuGj"
-)
+CRAFT_URL = "https://github.com/norphiil/craft-text-detector_updated/blob/v0.4.5-fix.1/models/craft_mlt_25k.pth"
+REFINENET_URL = "https://github.com/norphiil/craft-text-detector_updated/blob/v0.4.5-fix.1/models/craft_refiner_CTW1500.pth"
 
 
 # unwarp corodinates
@@ -35,14 +33,13 @@ def copyStateDict(state_dict):
 
 
 def load_craftnet_model(
-        cuda: bool = False,
-        weight_path: Optional[Union[str, Path]] = None
+    cuda: bool = False, weight_path: Optional[Union[str, Path]] = None
 ):
     # get craft net path
     if weight_path is None:
+        home_path = str(Path.home())
         weight_path = Path(
-            "models",
-            "craft_mlt_25k.pth"
+            home_path, ".craft_text_detector", "weights", "craft_mlt_25k.pth"
         )
     weight_path = Path(weight_path).resolve()
     weight_path.parent.mkdir(exist_ok=True, parents=True)
@@ -54,7 +51,7 @@ def load_craftnet_model(
     craft_net = CraftNet()  # initialize
 
     # check if weights are already downloaded, if not download
-    url = CRAFT_GDRIVE_URL
+    url = CRAFT_URL
     if not os.path.isfile(weight_path):
         print("Craft text detector weight will be downloaded to {}".format(weight_path))
 
@@ -76,14 +73,13 @@ def load_craftnet_model(
 
 
 def load_refinenet_model(
-        cuda: bool = False,
-        weight_path: Optional[Union[str, Path]] = None
+    cuda: bool = False, weight_path: Optional[Union[str, Path]] = None
 ):
     # get refine net path
     if weight_path is None:
+        home_path = str(Path.home())
         weight_path = Path(
-            "models",
-            "craft_refiner_CTW1500.pth"
+            home_path, ".craft_text_detector", "weights", "craft_refiner_CTW1500.pth"
         )
     weight_path = Path(weight_path).resolve()
     weight_path.parent.mkdir(exist_ok=True, parents=True)
@@ -95,7 +91,7 @@ def load_refinenet_model(
     refine_net = RefineNet()  # initialize
 
     # check if weights are already downloaded, if not download
-    url = REFINENET_GDRIVE_URL
+    url = REFINENET_URL
     if not os.path.isfile(weight_path):
         print("Craft text refiner weight will be downloaded to {}".format(weight_path))
 
@@ -172,7 +168,7 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text)
         rectangle = cv2.minAreaRect(np_contours)
         box = cv2.boxPoints(rectangle)
 
-        # boundary check due to minAreaRect may have out of range values 
+        # boundary check due to minAreaRect may have out of range values
         # (see https://docs.opencv.org/3.4/d3/dc0/group__imgproc__shape.html#ga3d476a3417130ae5154aea421ca7ead9)
         for p in box:
             if p[0] < 0:
