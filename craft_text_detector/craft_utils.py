@@ -10,8 +10,8 @@ import numpy as np
 import craft_text_detector.file_utils as file_utils
 import craft_text_detector.torch_utils as torch_utils
 
-CRAFT_URL = "https://github.com/norphiil/craft-text-detector_updated/blob/v0.4.5-fix.1/models/craft_mlt_25k.pth"
-REFINENET_URL = "https://github.com/norphiil/craft-text-detector_updated/blob/v0.4.5-fix.1/models/craft_refiner_CTW1500.pth"
+CRAFT_URL = "https://github.com/norphiil/craft-text-detector_updated/raw/v0.4.7-fix.1/models/craft_mlt_25k.pth"
+REFINENET_URL = "https://github.com/norphiil/craft-text-detector_updated/raw/v0.4.7-fix.1/models/craft_refiner_CTW1500.pth"
 
 
 # unwarp corodinates
