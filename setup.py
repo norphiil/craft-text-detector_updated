@@ -24,14 +24,14 @@ def get_version():
 
 
 setuptools.setup(
-    name="craft-text-detector",
+    name="craft-text-detector_updated",
     version=get_version(),
     author="Fatih Cagatay Akyon",
     license="MIT",
     description="Fast and accurate text detection library built on CRAFT implementation",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
-    url="https://github.com/fcakyon/craft_text_detector",
+    url="https://github.com/norphiil/craft-text-detector_updated",
     packages=setuptools.find_packages(exclude=["tests"]),
     install_requires=get_requirements(),
     python_requires=">=3.7",
