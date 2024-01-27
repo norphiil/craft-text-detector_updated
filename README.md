@@ -32,7 +32,7 @@ pip install craft-text-detector-updated
 
 ```python
 # import Craft class
-from craft-text-detector-updated import Craft
+from craft_text_detector import Craft
 
 # set image path and export folder directory
 image = 'figures/idcard.png' # can be filepath, PIL image or numpy array
