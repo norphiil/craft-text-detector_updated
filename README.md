@@ -25,14 +25,14 @@ PyTorch implementation for CRAFT text detector that effectively detect text area
 - Install using pip:
 
 ```console
-pip install craft-text-detector
+pip install craft-text-detector-updated
 ```
 
 ### Basic Usage
 
 ```python
 # import Craft class
-from craft_text_detector import Craft
+from craft-text-detector-updated import Craft
 
 # set image path and export folder directory
 image = 'figures/idcard.png' # can be filepath, PIL image or numpy array
